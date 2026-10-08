@@ -49,7 +49,7 @@ export const CASES: CaseStudy[] = [
       {area:'Design',text:'Designed the brief, report, and proposal templates in Figma, so every client gets the same quality of document.'}],
     outcome:'Turnaround dropped from nine days to three, and the same six writers now handle more than twice the volume.',
     chart:{label:'Pieces shipped per month',x:['Jan','Mar','May','Jul','Sep','Nov'],y:[22,26,34,41,52,58]} },
-  { id:'clickup', link:'https://nelsonansah.framer.website/store/clickup', linkLabel:'Read the pillar guide', client:'ClickUp', sector:'Project management software', areas:['SEO & AI search','Editorial','Distribution'],
+  { id:'clickup', link:'https://clickup.com/blog/how-to-manage-a-software-development-team-remotely/', linkLabel:'Read the guide', client:'ClickUp', sector:'Project management software', areas:['SEO & AI search','Editorial','Distribution'],
     title:'Engineering-management guides that rank on a crowded first page',
     metrics:[{v:'1.2M',l:'organic sessions @ EOY'},{v:'21',l:'target terms in the top three'},{v:'38',l:'guides written and optimized'}],
     challenge:'ClickUp\'s buyers search terms where Asana, Monday, and Atlassian already own the first page. The strategy was set. The guides had to be good enough to beat pages with years of authority behind them.',
