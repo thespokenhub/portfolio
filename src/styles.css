@@ -76,7 +76,7 @@ input, textarea, select, button { font: inherit; }
 /* Pyramid headline with the portrait showing through the letters.
    --portrait-y moves the photo up or down inside the letters to frame the face. */
 .hero h1.pyramid {
-  --portrait-y: 22%;
+  --portrait-y: 60%;
   width: min(100%, 1040px);
   margin: 0 auto;
   display: flex;
