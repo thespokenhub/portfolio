@@ -25,7 +25,7 @@ export type CaseStudy = {
 };
 
 export const CASES: CaseStudy[] = [
-  { id:'fintech', client:'O8', sector:'B2B SaaS, Series B', areas:['Editorial','Distribution','Measurement'],
+  { id:'o8', client:'O8', sector:'B2B SaaS, Series B', areas:['Editorial','Distribution','Measurement'],
     title:'Executing a content program that sourced $2.4M in pipeline',
     metrics:[{v:'$2.4M',l:'content-sourced pipeline in 12 months'},{v:'31%',l:'of SQLs touched content before the first call'},{v:'3',l:'flagship assets: an ebook, a report, and a whitepaper'}],
     challenge:'O8 had a strategy and a sales team asking for better material. What it needed was someone to ship the assets, get them in front of buyers, and show what they did for revenue.',
@@ -132,7 +132,7 @@ export const CASES: CaseStudy[] = [
     outcome:'The site reached 18,000 monthly visits within six months and books calls every week without paid ads.' },
 ];
 
-export const FEATURED = ['fintech', 'roofr', 'clickup', 'other-guys'];
+export const FEATURED = ['o8', 'roofr', 'clickup', 'other-guys'];
 
 export const SCOPE = [
   {name:'Strategy', line:'Content strategy tied to revenue targets, ICP research, and the narrative every piece is written from.', tools:'Gong, HubSpot, customer interviews'},

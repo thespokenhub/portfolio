@@ -1,32 +1,46 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   CASES, EDITS, FEATURED, LINKS, PLAN, PRINCIPLES, SCOPE, STATS, TIMELINE, TOOLS,
-  type CaseStudy,
 } from './data';
+import { caseHref, parsePath, pathFromLegacyHash, pageMeta, PATHS, type Page } from './routes';
 
-const ROUTES = ['home', 'work', 'scope', 'about', 'contact'] as const;
-type Route = (typeof ROUTES)[number];
-
-const NAV: [Route, string][] = [['work', 'Results'], ['scope', 'What I do'], ['about', 'About'], ['contact', 'Contact']];
+type NavKey = 'work' | 'scope' | 'about' | 'contact';
+const NAV: [NavKey, string][] = [['work', 'Results'], ['scope', 'What I do'], ['about', 'About'], ['contact', 'Contact']];
 
 const pad = (i: number) => String(i + 1).padStart(2, '0');
-const caseHref = (c: CaseStudy) => '#work/' + c.id;
 
-function parseHash(): { route: Route; id: string | null } {
-  const [r, id] = (window.location.hash.slice(1) || 'home').split('/');
-  const route = (ROUTES as readonly string[]).includes(r) ? (r as Route) : 'home';
-  const ok = !!id && CASES.some(c => c.id === id);
-  return { route, id: route === 'work' && ok ? id : null };
+function navigate(path: string) {
+  if (path === window.location.pathname) return;
+  window.history.pushState(null, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+  window.scrollTo(0, 0);
 }
 
-function useHashRoute() {
-  const [loc, setLoc] = useState(parseHash);
+function usePage(): Page {
+  const [page, setPage] = useState<Page>(() => {
+    const legacy = pathFromLegacyHash(window.location.hash);
+    if (legacy) window.history.replaceState(null, '', legacy);
+    return parsePath(window.location.pathname);
+  });
   useEffect(() => {
-    const onHash = () => { setLoc(parseHash()); window.scrollTo(0, 0); };
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    const onPop = () => setPage(parsePath(window.location.pathname));
+    // Handle same-origin links in the app without a full page load.
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element).closest('a');
+      if (!a || a.target || a.hasAttribute('download') || a.origin !== window.location.origin) return;
+      e.preventDefault();
+      navigate(a.pathname);
+    };
+    window.addEventListener('popstate', onPop);
+    document.addEventListener('click', onClick);
+    return () => { window.removeEventListener('popstate', onPop); document.removeEventListener('click', onClick); };
   }, []);
-  return loc;
+  return page;
+}
+
+function setMeta(selector: string, attr: string, value: string) {
+  document.head.querySelector(selector)?.setAttribute(attr, value);
 }
 
 function External({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
@@ -34,41 +48,48 @@ function External({ href, className, children }: { href: string; className?: str
 }
 
 export default function App() {
-  const { route, id } = useHashRoute();
+  const page = usePage();
 
   useEffect(() => {
-    const c = id && CASES.find(x => x.id === id);
-    const page = c ? c.client : NAV.find(([k]) => k === route)?.[1];
-    document.title = page ? `${page} · Nelson Ansah` : 'Nelson Ansah · Head of Content';
-  }, [route, id]);
+    const m = pageMeta(page);
+    const url = window.location.origin + m.path;
+    document.title = m.title;
+    setMeta('meta[name="description"]', 'content', m.description);
+    setMeta('link[rel="canonical"]', 'href', url);
+    setMeta('meta[property="og:url"]', 'content', url);
+    setMeta('meta[property="og:title"]', 'content', m.title);
+    setMeta('meta[property="og:description"]', 'content', m.description);
+  }, [page]);
 
+  const active = page.kind === 'case' ? 'work' : page.kind;
   return (
     <div className="page">
-      <Header route={route} />
+      <Header active={active} />
       <main>
-        {route === 'home' && <Home />}
-        {route === 'work' && !id && <Work />}
-        {route === 'work' && id && <Case id={id} />}
-        {route === 'scope' && <Scope />}
-        {route === 'about' && <About />}
-        {route === 'contact' && <Contact />}
+        {page.kind === 'home' && <Home />}
+        {page.kind === 'work' && <Work />}
+        {page.kind === 'case' && <Case id={page.id} />}
+        {page.kind === 'scope' && <Scope />}
+        {page.kind === 'about' && <About />}
+        {page.kind === 'contact' && <Contact />}
+        {page.kind === 'notFound' && <NotFound />}
       </main>
       <Footer />
     </div>
   );
 }
 
-function Header({ route }: { route: Route }) {
+function Header({ active }: { active: string }) {
   return (
     <header className="header">
       <div className="wrap header-inner">
-        <a href="#home" className="logo" aria-label="Home">N.</a>
+        <a href={PATHS.home} className="logo" aria-label="Home">N.</a>
         <nav className="nav">
           {NAV.map(([k, l]) => (
-            <a key={k} href={'#' + k} className={route === k ? 'active' : undefined} aria-current={route === k ? 'page' : undefined}>{l}</a>
+            <a key={k} href={PATHS[k]} className={active === k ? 'active' : undefined} aria-current={active === k ? 'page' : undefined}>{l}</a>
           ))}
         </nav>
-        <a href="#contact" className="btn btn-accent header-cta">Book a call</a>
+        <a href={PATHS.contact} className="btn btn-accent header-cta">Book a call</a>
       </div>
     </header>
   );
@@ -80,11 +101,11 @@ function Footer() {
       <div className="wrap footer-inner">
         <span>© 2026 Nelson Ansah</span>
         <div className="footer-links">
-          <a href="#work">Results</a>
-          <a href="#scope">What I do</a>
+          <a href={PATHS.work}>Results</a>
+          <a href={PATHS.scope}>What I do</a>
           <External href={LINKS.linkedin}>LinkedIn</External>
-          <a href="#about">About</a>
-          <a href="#contact">Book a call</a>
+          <a href={PATHS.about}>About</a>
+          <a href={PATHS.contact}>Book a call</a>
         </div>
       </div>
     </footer>
@@ -104,8 +125,8 @@ function Home() {
           <div className="hero-foot">
             <p>For B2B software companies, I own the strategy and the editorial bar, plus the distribution, design, and automation that let a small team publish like a big one.</p>
             <div className="btn-row">
-              <a href="#work" className="btn btn-white">See the results</a>
-              <a href="#scope" className="btn btn-ghost-white">What I do</a>
+              <a href={PATHS.work} className="btn btn-white">See the results</a>
+              <a href={PATHS.scope} className="btn btn-ghost-white">What I do</a>
             </div>
           </div>
         </div>
@@ -126,7 +147,7 @@ function Home() {
         </div>
         <div className="grid-box scope-grid">
           {SCOPE.map((a, i) => (
-            <a key={a.name} href="#scope" className="scope-cell">
+            <a key={a.name} href={PATHS.scope} className="scope-cell">
               <span className="n">{pad(i)}</span>
               <span className="cond name">{a.name}</span>
               <span className="line">{a.line}</span>
@@ -138,11 +159,11 @@ function Home() {
       <section className="wrap pad section section-tight">
         <div className="section-head" style={{ marginBottom: 28 }}>
           <h2 className="display h2">Results</h2>
-          <a href="#work" className="caps" style={{ fontSize: 14 }}>All ten case studies →</a>
+          <a href={PATHS.work} className="caps" style={{ fontSize: 14 }}>All ten case studies →</a>
         </div>
         <div className="cards">
           {featured.map(c => (
-            <a key={c.id} href={caseHref(c)} className="card">
+            <a key={c.id} href={caseHref(c.id)} className="card">
               <span className="label">{c.client}</span>
               <span className="num">{c.metrics[0].v}</span>
               <span className="lead-l">{c.metrics[0].l}</span>
@@ -170,7 +191,7 @@ function Home() {
         <div className="wrap cta-inner">
           <h2 className="display">Building out content this year?</h2>
           <div className="btn-row">
-            <a href="#contact" className="btn btn-white">Book a 30-minute call</a>
+            <a href={PATHS.contact} className="btn btn-white">Book a 30-minute call</a>
             <External href={LINKS.linkedin} className="btn btn-ghost-white">Message me on LinkedIn ↗</External>
           </div>
         </div>
@@ -232,7 +253,7 @@ function Work() {
       </div>
       <div className="rows">
         {shown.map(c => (
-          <a key={c.id} href={caseHref(c)} className="row">
+          <a key={c.id} href={caseHref(c.id)} className="row">
             <span className="row-lead"><span className="num">{c.metrics[0].v}</span><span className="l">{c.metrics[0].l}</span></span>
             <span className="row-main"><span className="label">{c.client}</span><span className="title">{c.title}</span></span>
             <span className="row-areas">{c.areas.join(' · ')}</span>
@@ -252,7 +273,7 @@ function Case({ id }: { id: string }) {
     <article>
       <div className="case-hero">
         <div className="wrap case-hero-inner">
-          <a href="#work" className="label nolink">← All results</a>
+          <a href={PATHS.work} className="label nolink">← All results</a>
           <div className="case-meta">{c.client} · {c.sector}</div>
           <h1 className="display">{c.title}</h1>
         </div>
@@ -302,7 +323,7 @@ function Case({ id }: { id: string }) {
               </div>
             </figure>
           )}
-          <a href={caseHref(next)} className="next">
+          <a href={caseHref(next.id)} className="next">
             <span className="label">Next →</span>
             <span className="title">{next.title}</span>
           </a>
@@ -357,7 +378,7 @@ function About() {
           <img src={LINKS.photo} alt="Nelson Ansah" />
           <div className="btn-row">
             <External href={LINKS.linkedin} className="btn btn-ink">LinkedIn ↗</External>
-            <a href="#contact" className="btn btn-ghost-ink">Book a call</a>
+            <a href={PATHS.contact} className="btn btn-ghost-ink">Book a call</a>
           </div>
         </div>
         <div className="about-text">
@@ -423,6 +444,21 @@ function Contact() {
       </div>
       <div className="booking">
         <iframe src={calendlyEmbedUrl()} title="Book a 30-minute call with Nelson Ansah" loading="lazy" />
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Not found ---------- */
+
+function NotFound() {
+  return (
+    <section className="wrap pad page-top">
+      <h1 className="display h1">Page not found</h1>
+      <p className="intro">That link doesn't go anywhere on this site. The results are a good place to start.</p>
+      <div className="btn-row">
+        <a href={PATHS.work} className="btn btn-accent btn-lg">See the results</a>
+        <a href={PATHS.home} className="btn btn-ghost-ink btn-lg">Go to the home page</a>
       </div>
     </section>
   );
