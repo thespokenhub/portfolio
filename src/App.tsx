@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   CASES, EDITS, FEATURED, LINKS, PLAN, PRINCIPLES, SCOPE, STATS, TIMELINE, TOOLS,
 } from './data';
@@ -121,7 +121,7 @@ function Home() {
       <section className="hero">
         <div className="wrap hero-inner">
           <div className="hero-tags"><span>Head of content</span><span>B2B SaaS</span><span>Seed to Series C</span></div>
-          <h1 className="display">I build content programs that bring in pipeline.</h1>
+          <PortraitHeadline />
           <div className="hero-foot">
             <p>For B2B software companies, I own the strategy and the editorial bar, plus the distribution, design, and automation that let a small team publish like a big one.</p>
             <div className="btn-row">
@@ -197,6 +197,39 @@ function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+// The hero headline set as a pyramid, each line sized so the widths step up toward the
+// bottom, with the portrait showing through the letters.
+const HEADLINE_LINES = ['I build', 'content', 'programs that', 'bring in pipeline.'];
+const LINE_WIDTHS = [0.4, 0.58, 0.86, 1];
+
+function PortraitHeadline() {
+  const ref = useRef<HTMLHeadingElement>(null);
+
+  useLayoutEffect(() => {
+    const h1 = ref.current;
+    if (!h1) return;
+    const fit = () => {
+      const width = h1.clientWidth;
+      const lines = Array.from(h1.querySelectorAll<HTMLElement>('.pyramid-line'));
+      for (const line of lines) line.style.fontSize = '100px';
+      lines.forEach((line, i) => {
+        line.style.fontSize = (100 * width * LINE_WIDTHS[i]) / line.scrollWidth + 'px';
+      });
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    const ro = new ResizeObserver(fit);
+    ro.observe(h1);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <h1 ref={ref} className="display pyramid" style={{ ['--portrait' as string]: `url("${LINKS.photo}")` }}>
+      {HEADLINE_LINES.map((l, i) => <span key={l} className="pyramid-line">{l}{i < HEADLINE_LINES.length - 1 ? ' ' : ''}</span>)}
+    </h1>
   );
 }
 

@@ -73,6 +73,30 @@ input, textarea, select, button { font: inherit; }
 .hero-inner { padding: 64px 28px 40px; }
 .hero-tags { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
 .hero h1 { font-size: clamp(64px, 11.5vw, 184px); line-height: 0.86; letter-spacing: -0.02em; text-wrap: balance; }
+/* Pyramid headline with the portrait showing through the letters.
+   --portrait-y moves the photo up or down inside the letters to frame the face. */
+.hero h1.pyramid {
+  --portrait-y: 22%;
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  text-wrap: nowrap;
+  color: var(--white);
+  background-color: var(--white);
+  background-image: var(--portrait);
+  background-size: cover;
+  background-position: 50% var(--portrait-y);
+  background-blend-mode: luminosity;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.pyramid-line { display: block; white-space: nowrap; font-size: 10vw; }
 .hero-foot { display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between; align-items: flex-end; margin-top: 48px; border-top: 2px solid var(--white); padding-top: 24px; }
 .hero-foot p { margin: 0; max-width: 620px; font-size: 20px; line-height: 1.45; text-wrap: pretty; }
 .btn-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 14px; }
@@ -289,6 +313,7 @@ input, textarea, select, button { font: inherit; }
   .hero-inner { padding: 36px 20px 28px; }
   .hero-tags { gap: 8px 16px; font-size: 12px; margin-bottom: 20px; }
   .hero h1 { font-size: clamp(50px, 15.5vw, 80px); line-height: 0.88; }
+  .hero h1.pyramid { line-height: 0.84; }
   .hero-foot { margin-top: 28px; padding-top: 20px; gap: 24px; }
   .hero-foot p { font-size: 17px; }
 
