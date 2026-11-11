@@ -27,7 +27,7 @@ export type CaseStudy = {
 export const CASES: CaseStudy[] = [
   { id:'o8', client:'O8', sector:'B2B SaaS, Series B', areas:['Editorial','Distribution','Measurement'],
     title:'Executing a content program that sourced $2.4M in pipeline',
-    metrics:[{v:'$2.4M',l:'content-sourced pipeline in 12 months'},{v:'31%',l:'of SQLs touched content before the first call'},{v:'3',l:'flagship assets: an ebook, a report, and a whitepaper'}],
+    metrics:[{v:'$2.4M',l:'content-sourced pipeline in 24 months'},{v:'31%',l:'of SQLs touched content before the first call'},{v:'3',l:'flagship assets: an ebook, a report, and a whitepaper'}],
     challenge:'O8 had a strategy and a sales team asking for better material. What it needed was someone to ship the assets, get them in front of buyers, and show what they did for revenue.',
     moves:[
       {area:'Editorial',text:'Wrote and produced an ebook, a benchmark report, and a whitepaper, each built around a problem sales heard on almost every call.'},
@@ -36,7 +36,7 @@ export const CASES: CaseStudy[] = [
       {area:'Measurement',text:'Built a Looker Studio dashboard that ties every download and content touch to opportunities in HubSpot.'},
       {area:'Sales',text:'Cut each asset into one-pagers and follow-up emails that reps used in late-stage deals.'}],
     outcome:'The three assets became O8\'s second-largest source of pipeline after outbound, and content got its own slide in the board deck.',
-    chart:{label:'Content-sourced pipeline by quarter ($K)',x:['Q1','Q2','Q3','Q4'],y:[180,420,760,1040]} },
+    chart:{label:'Content-sourced pipeline by half-year ($K)',x:['H1 2024','H2 2024','H1 2025','H2 2025'],y:[180,420,760,1040]} },
   { id:'other-guys', link:'https://deotherguys.com', linkLabel:'Visit The Other Guys', client:'The Other Guys', sector:'Content agency, 14 B2B clients', areas:['Systems','Team','Editorial'],
     title:'Running an agency on a content system I built',
     metrics:[{v:'9→3',l:'days from brief to first draft'},{v:'2.6×',l:'pieces per writer per month'},{v:'14',l:'clients on one workflow'}],
@@ -162,7 +162,7 @@ export const EDITS = [
 ];
 
 export const STATS: Metric[] = [
-  {v:'$2.4M',l:'content-sourced pipeline in 12 months'},
+  {v:'$2.4M',l:'content-sourced pipeline in 24 months'},
   {v:'300K',l:'monthly organic visits for Roofr, the leader in roofing software search'},
   {v:'9→3',l:'days from brief to draft across 14 agency clients'},
   {v:'2.1M',l:'reads on interview guides built from coach transcripts'},
